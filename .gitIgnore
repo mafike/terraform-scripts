@@ -1,0 +1,7 @@
+LICENSE.txt
+terraform-provider-aws_v5.54.1_x5
+.terraform.lock.hcl
+.terraform/
+terraform.tf
+
+
