@@ -20,6 +20,7 @@ resource "aws_vpc" "vpc" {
     Name        = var.vpc_name
     Environment = "demo_environment"
     Terraform   = "true"
+    Region = data.aws_region.current.name
   }
 }
 
@@ -158,3 +159,13 @@ resource "aws_instance" "web_server" {
     App = local.application
   }
 }
+
+resource "tls_private_key" "generated" {
+  algorithm = "RSA"
+}
+
+resource "local_file" "private_key_pem" {
+  content  = tls_private_key.generated.private_key_pem
+  filename = "MyAWSKey.pem"
+}
+
