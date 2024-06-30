@@ -6,5 +6,5 @@ terraform.tf
 .idea
 .vscode
 .DS_store
-
+terraform.tfstate
 
