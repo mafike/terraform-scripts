@@ -3,6 +3,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+ backend "remote" {
+    hostname = "app.terraform.io"
+    organization = "mafi"
+
+    workspaces {
+      name = "my-aws-app"
+    }
+  }
+}
 #Retrieve the list of AZs in the current AWS region
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
@@ -67,12 +77,12 @@ resource "aws_route_table" "public_route_table" {
 }
 
 resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_vpc.vpc.id 
 
   route {
     cidr_block = "0.0.0.0/0"
-    # gateway_id     = aws_internet_gateway.internet_gateway.id
-    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+     gateway_id     = aws_internet_gateway.internet_gateway.id
+    # nat_gateway_id = aws_nat_gateway.nat_gateway.id
   }
   tags = {
     Name      = "demo_private_rtb"
@@ -104,14 +114,16 @@ resource "aws_internet_gateway" "internet_gateway" {
 }
 
 #Create EIP for NAT Gateway
+/*
 resource "aws_eip" "nat_gateway_eip" {
   depends_on = [aws_internet_gateway.internet_gateway]
   tags = {
     Name = "demo_igw_eip"
   }
 }
-
+*\
 #Create NAT Gateway
+/*
 resource "aws_nat_gateway" "nat_gateway" {
   depends_on    = [aws_subnet.public_subnets]
   allocation_id = aws_eip.nat_gateway_eip.id
@@ -120,6 +132,7 @@ resource "aws_nat_gateway" "nat_gateway" {
     Name = "demo_nat_gateway"
   }
 }
+*/
 
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -276,10 +289,10 @@ resource "aws_key_pair" "generated" {
   }
 }
 
-module "server" {
-  source          = "../modules/server"
-  ami             = data.aws_ami.ubuntu.id
-  subnet_id       = aws_subnet.public_subnets["public_subnet_3"].id
+/* module "server" {
+  source    = "../modules/server"
+  ami       = data.aws_ami.ubuntu.id
+  subnet_id = aws_subnet.public_subnets["public_subnet_3"].id
   security_groups = [
     aws_security_group.vpc-ping.id,
     aws_security_group.ingress-ssh.id,
@@ -288,29 +301,29 @@ module "server" {
 }
 
 module "server_subnet_1" {
-  source          = "../modules/web_server"
-  ami             = data.aws_ami.ubuntu.id
-  key_name        = aws_key_pair.generated.key_name
-  user            = "ubuntu"
-  private_key     = tls_private_key.generated.private_key_pem
-  subnet_id       = aws_subnet.public_subnets["public_subnet_1"].id
-  security_groups = [aws_security_group.vpc-ping.id, 
-  aws_security_group.ingress-ssh.id, 
+  source      = "../modules/web_server"
+  ami         = data.aws_ami.ubuntu.id
+  key_name    = aws_key_pair.generated.key_name
+  user        = "ubuntu"
+  private_key = tls_private_key.generated.private_key_pem
+  subnet_id   = aws_subnet.public_subnets["public_subnet_1"].id
+  security_groups = [aws_security_group.vpc-ping.id,
+    aws_security_group.ingress-ssh.id,
   aws_security_group.vpc-web.id]
 }
 
 module "autoscaling" {
-  source  = "github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v4.9.0"
+  source = "github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v4.9.0"
 
   # Autoscaling group
   name = "myasg"
 
-  vpc_zone_identifier = [aws_subnet.private_subnets["private_subnet_1"].id, 
-  aws_subnet.private_subnets["private_subnet_2"].id, 
+  vpc_zone_identifier = [aws_subnet.private_subnets["private_subnet_1"].id,
+    aws_subnet.private_subnets["private_subnet_2"].id,
   aws_subnet.private_subnets["private_subnet_3"].id]
-  min_size            = 0
-  max_size            = 1
-  desired_capacity    = 1
+  min_size         = 0
+  max_size         = 1
+  desired_capacity = 1
 
   # Launch template
   use_lt    = true
@@ -326,7 +339,7 @@ module "autoscaling" {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.0"
 
   name = "my-vpc-terraform"
@@ -340,8 +353,8 @@ module "vpc" {
   enable_vpn_gateway = true
 
   tags = {
-    Name = "VPC from Module"
-    Terraform = "true"
+    Name        = "VPC from Module"
+    Terraform   = "true"
     Environment = "dev"
   }
-}
+} */
