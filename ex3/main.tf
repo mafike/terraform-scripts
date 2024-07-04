@@ -238,7 +238,7 @@ resource "aws_instance" "ubuntu_server" {
   subnet_id                   = aws_subnet.public_subnets["public_subnet_1"].id
   security_groups             = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.generated.key_name
+  
 
   provisioner "remote-exec" {
     inline = [
@@ -260,4 +260,9 @@ resource "aws_instance" "ubuntu_server" {
 
 }
 
+resource "aws_subnet" "list_subnet" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = var.ip[var.environment]
+  availability_zone = var.us-east-1-azs[0]
+}
 
