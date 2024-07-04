@@ -4,13 +4,9 @@ provider "aws" {
 }
 
 terraform {
- backend "remote" {
-    hostname = "app.terraform.io"
-    organization = "mafi"
-
-    workspaces {
-      name = "my-aws-app"
-    }
+  backend "local" {
+    path = "terraform.tfstate"
+    
   }
 }
 #Retrieve the list of AZs in the current AWS region
@@ -22,6 +18,8 @@ locals {
   application = "api_server"
   server_name = "ec2-${var.environment}-api-${var.variables_sub_az}"
 }
+
+
 #Define the VPC 
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
