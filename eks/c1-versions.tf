@@ -7,6 +7,28 @@ terraform {
       #version = ">= 4.65"
       version = ">= 5.31"
      }
+     helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.9"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.16"
+    }
+  }
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.eks.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.eks.token
   }
 }
 

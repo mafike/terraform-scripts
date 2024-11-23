@@ -17,3 +17,17 @@ variable "business_divsion" {
   type = string
   default = "SAP"
 }
+
+variable "aws_region" {
+  description = "AWS Region"
+  default     = "us-east-1"
+}
+
+variable "cluster_name" {
+  description = "EKS Cluster Name"
+}
+
+variable "namespace" {
+  description = "Namespace for resources"
+  default     = "default"
+}
