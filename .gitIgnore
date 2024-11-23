@@ -8,3 +8,7 @@ terraform.tf
 .DS_store
 terraform.tfstate
 terraform.tfstate.backup
+eks-lessons
+eks
+private-key
+
