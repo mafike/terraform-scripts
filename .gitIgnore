@@ -9,6 +9,5 @@ terraform.tf
 terraform.tfstate
 terraform.tfstate.backup
 eks-lessons
-eks
 private-key
 
