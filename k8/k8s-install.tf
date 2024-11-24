@@ -1,4 +1,4 @@
-resource "null_resource" "install_helm" {
+/* resource "null_resource" "install_helm" {
   provisioner "local-exec" {
     command = <<EOT
       export VERIFY_CHECKSUM=false
@@ -46,24 +46,4 @@ resource "helm_release" "alertmanager" {
 
   values = [file("values/alermanager.yml")]
 }
-
-resource "kubernetes_config_map" "prometheus_custom" {
-  metadata {
-    name      = "prometheus"
-    namespace = "istio-system"
-  }
-
-  data = yamldecode(file("values/prom-cm.yaml"))
-}
-
-resource "kubernetes_manifest" "mtls_policy" {
-  manifest = yamldecode(file("values/mtls.yml"))
-}
-
-resource "kubernetes_manifest" "kube_scan" {
-  manifest = yamldecode(file("values/kube-scan.yml"))
-}
-
-resource "kubernetes_manifest" "istio_gateway_vs" {
-  manifest = yamldecode(file("values/istio-gw-vs.yml"))
-}
+*/
