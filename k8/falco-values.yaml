@@ -1,0 +1,9 @@
+falcosidekick:
+  enabled: true
+  webui:
+    enabled: true
+  config:
+    slack:
+      webhookurl: "https://hooks.slack.com/services/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"
+    customfields: "environment:production,datacenter:us-east-1"
+tty: true
