@@ -12,3 +12,7 @@ output "ec2_bastion_public_ip" {
   description = "Elastic IP associated to the Bastion Host"
   value       = aws_eip.bastion_eip.public_ip
 }
+output "bastion_security_group_id" {
+  description = "The Security Group ID for the Bastion Host"
+  value       = module.public_bastion_sg.security_group_id
+}
