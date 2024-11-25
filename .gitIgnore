@@ -12,3 +12,4 @@ eks-lessons
 private-key
 darwin-arm64
 tfc*
+k8/darwin-arm64/helm
