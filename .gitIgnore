@@ -11,3 +11,4 @@ terraform.tfstate.backup
 eks-lessons
 private-key
 darwin-arm64
+tfc*

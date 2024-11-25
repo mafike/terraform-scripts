@@ -73,7 +73,12 @@ variable "vpc_single_nat_gateway" {
   default     = true
 }
 
+variable "eks_cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
 
-
-
-
+variable "common_tags" {
+  description = "Common tags for resources"
+  type        = map(string)
+}

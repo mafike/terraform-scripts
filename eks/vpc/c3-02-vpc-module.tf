@@ -4,14 +4,12 @@ data "aws_availability_zones" "available" {
 
 # Create VPC Terraform Module
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-  #version = "3.11.0"
-  #version = "~> 3.11"
-  #version = "4.0.1"  
+  source = "terraform-aws-modules/vpc/aws"  
   version = ">=5.4.0"
+  
 
   # VPC Basic Details
-  name            = local.eks_cluster_name
+  name            = var.eks_cluster_name
   cidr            = var.vpc_cidr_block
   azs             = data.aws_availability_zones.available.names
   public_subnets  = var.vpc_public_subnets
@@ -33,19 +31,19 @@ module "vpc" {
   enable_dns_support   = true
 
 
-  tags     = local.common_tags
-  vpc_tags = local.common_tags
+  tags     = var.common_tags
+  vpc_tags = var.common_tags
 
   # Additional Tags to Subnets
   public_subnet_tags = {
     Type                                              = "Public Subnets"
     "kubernetes.io/role/elb"                          = 1
-    "kubernetes.io/cluster/${local.eks_cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
   private_subnet_tags = {
     Type                                              = "private-subnets"
     "kubernetes.io/role/internal-elb"                 = 1
-    "kubernetes.io/cluster/${local.eks_cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 
   database_subnet_tags = {
@@ -54,3 +52,4 @@ module "vpc" {
   # Instances launched into the Public subnet should be assigned a public IP address.
   map_public_ip_on_launch = true
 }
+

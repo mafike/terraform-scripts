@@ -20,6 +20,7 @@ variable "vpc_cidr" {
   default = "10.0.0.0/16"
 }
 
+
 variable "availability_zone" {
   type    = string
   default = "us-east-1a"
@@ -31,3 +32,4 @@ variable "mac_ip" {
   default     = "203.0.113.5/32" # Replace this with your actual IP if not using dynamic input
                                  # terraform apply -var "mac_ip=$(curl -s http://checkip.amazonaws.com)/32"
 }
+

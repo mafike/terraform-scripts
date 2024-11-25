@@ -9,9 +9,7 @@ resource "null_resource" "copy_ec2_keys" {
     password    = ""
     private_key = var.instance_keypair
   }
-    provisioner "local-exec" {
-    command = "chmod 600 ${local_file.eks_private_key.filename}"
-  }
+  
   ## File Provisioner: Copies the terraform-key.pem file to /tmp/terraform-key.pem
   provisioner "file" {
     source      = "private-key/eks-terraform-key.pem"

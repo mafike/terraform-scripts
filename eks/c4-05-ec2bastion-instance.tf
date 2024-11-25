@@ -14,3 +14,11 @@ module "ec2_public" {
   vpc_security_group_ids = [module.public_bastion_sg.security_group_id]
   tags                   = local.common_tags
 }
+
+module "vpc" {
+  source = "./vpc"
+
+  eks_cluster_name = local.eks_cluster_name
+  common_tags      = local.common_tags
+  # Other variables
+}

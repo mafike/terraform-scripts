@@ -3,16 +3,11 @@ provider "aws" {
   region = var.aws_region
 }
 
-terraform {
-  backend "local" {
-    path = "terraform.tfstate"
-  }
-}
-
+/*
 module "bastion_outputs" {
   source = "../eks" # Update path if necessary
 }
-/* # if the bastion sg exist
+ # if the bastion sg exist
 data "aws_security_group" "bastion" {
   filter {
     name   = "group-name"
@@ -22,21 +17,23 @@ data "aws_security_group" "bastion" {
 }
 */
 
-
-# Retrieve the list of AZs in the current AWS region
-data "aws_region" "current" {}
-
 module "vpc" {
-  source = "../eks" # Update the path to the VPC module
-  vpc_name                       = "jenkins-vpc"
-  vpc_cidr_block                 = "10.0.0.0/16"
-  vpc_public_subnets             = ["10.0.101.0/24", "10.0.102.0/24"]
-  vpc_private_subnets            = ["10.0.1.0/24", "10.0.2.0/24"]
-  vpc_database_subnets           = ["10.0.151.0/24", "10.0.152.0/24"]
-  vpc_enable_nat_gateway         = true
-  vpc_single_nat_gateway         = true
+  source                       = "../eks/vpc" # Update the path to the VPC module
+  vpc_name                     = "jenkins-vpc"
+  vpc_cidr_block               = "10.0.0.0/16"
+  vpc_public_subnets           = ["10.0.101.0/24", "10.0.102.0/24"]
+  vpc_private_subnets          = ["10.0.1.0/24", "10.0.2.0/24"]
+  vpc_database_subnets         = ["10.0.151.0/24", "10.0.152.0/24"]
+  vpc_enable_nat_gateway       = false
+  vpc_single_nat_gateway       = false
   vpc_create_database_subnet_group = false
   vpc_create_database_subnet_route_table = false
+  
+  eks_cluster_name = "jenkins-cluster" 
+  common_tags      = {
+    Application = "Jenkins"
+    Environment = "Development"
+  }
 }
 # Create Security Group for Jenkins server
 resource "aws_security_group" "jenkins" {
@@ -47,8 +44,8 @@ resource "aws_security_group" "jenkins" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    security_groups = [module.bastion_outputs.bastion_security_group_id]
-
+   // security_groups = [module.bastion_outputs.bastion_security_group_id]
+   // security_groups = [data.terraform_remote_state.vpc.outputs.bastion_security_group_id]
     cidr_blocks = [var.mac_ip] # SSH access
   }
 
@@ -75,7 +72,7 @@ resource "aws_security_group" "jenkins" {
 resource "aws_instance" "jenkins" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
-  subnet_id                   = module.vpc.public_subnets[0]
+ subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
   security_groups        = [aws_security_group.jenkins.id]
   key_name                    = aws_key_pair.generated.key_name
