@@ -39,6 +39,9 @@ resource "aws_eks_node_group" "eks_ng_private" {
   ]  
   tags = {
     Name = "Private-Node-Group"
+    # Cluster Autoscaler Tags
+    "k8s.io/cluster-autoscaler/${local.eks_cluster_name}" = "owned"
+    "k8s.io/cluster-autoscaler/enabled" = "TRUE"	
   }
 }
 */
