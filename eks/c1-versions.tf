@@ -5,7 +5,7 @@ terraform {
     aws = {
       source = "hashicorp/aws"
       #version = ">= 4.65"
-      version = ">= 5.31"
+      version = "~> 5.31"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -15,7 +15,11 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.16"
     }
+    http = {
+      source = "hashicorp/http"
+      version = "~> 3.4.5"
   }
+}
 }
 /*
 provider "kubernetes" {
