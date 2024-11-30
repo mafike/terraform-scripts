@@ -1,45 +1,54 @@
 #!/bin/bash
+set -e
+
+# Log all output to user data log
+exec > >(tee /var/log/userdata.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+# Update and install prerequisites
 sudo apt-get -y update
-sudo apt-get install -y unzip
-sudo apt-get install -y nfs-common
+sudo apt-get install -y unzip nfs-common openjdk-11-jdk
+
+# Create Jenkins user and directory
 sudo mkdir -p /var/lib/jenkins
-sudo adduser -m -d /var/lib/jenkins jenkins
-sudo groupadd jenkins
-sudo usermod -a -G jenkins jenkins
+sudo groupadd jenkins || true
+sudo useradd -m -d /var/lib/jenkins -g jenkins jenkins || true
 sudo chown -R jenkins:jenkins /var/lib/jenkins
-while ! (sudo mount -t nfs4 -o vers=4.1 $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).${aws_efs_file_system.JenkinsEFS.dns_name}:/ /var/lib/jenkins); do sleep 10; done
-# Edit fstab so EFS automatically loads on reboot
-while ! (echo ${aws_efs_file_system.JenkinsEFS.dns_name}:/ /var/lib/jenkins nfs defaults,vers=4.1 0 0 >> /etc/fstab) ; do sleep 10; done
-# Set  desired hostname
-NEW_HOSTNAME="jenkins"
+
+# Fetch the EFS DNS name and mount the EFS
+EFS_DNS="${aws_efs_file_system.JenkinsEFS.dns_name}"
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+FULL_EFS_DNS="${AZ}.${EFS_DNS}"
+
+echo "Attempting to mount EFS: ${FULL_EFS_DNS}"
+MAX_RETRIES=10
+RETRY_COUNT=0
+while ! sudo mount -t nfs4 -o vers=4.1 "${FULL_EFS_DNS}:/" /var/lib/jenkins; do
+    echo "EFS mount failed, retrying in 10 seconds..."
+    sleep 10
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [[ $RETRY_COUNT -ge $MAX_RETRIES ]]; then
+        echo "EFS mount failed after $MAX_RETRIES attempts. Exiting."
+        exit 1
+    fi
+done
+echo "EFS mounted successfully."
+
+# Add EFS to /etc/fstab for persistence
+if ! grep -q "${FULL_EFS_DNS}" /etc/fstab; then
+    echo "${FULL_EFS_DNS}:/ /var/lib/jenkins nfs defaults,vers=4.1 0 0" | sudo tee -a /etc/fstab
+    echo "EFS entry added to /etc/fstab."
+else
+    echo "EFS entry already exists in /etc/fstab."
+fi
 
 # Install Jenkins
-sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-  https://pkg.jenkins.io/debian-stable binary/" | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+echo "deb https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list
+sudo apt-get -y update
+sudo apt-get -y install jenkins
 
-sudo apt-get update && sudo apt update
-sudo apt install fontconfig openjdk-17-jre -y
-sudo apt-get install jenkins -y
-sudo apt-get install maven -y
-
-# Change Jenkins port from 8080 to 8090 in the systemd service file
-sudo sed -i 's/Environment="JENKINS_PORT=8080"/Environment="JENKINS_PORT=8090"/' /usr/lib/systemd/system/jenkins.service
-
-# Change the port in the default configuration file as well
-sudo sed -i 's/^HTTP_PORT=8080/HTTP_PORT=8090/' /etc/default/jenkins
-
-# Change the hostname
-sudo hostnamectl set-hostname $NEW_HOSTNAME
-echo "$NEW_HOSTNAME" | sudo tee -a /etc/hosts
-
-# Reload systemd configuration
+# Enable and start Jenkins service
 sudo systemctl daemon-reload
-
-# Start Jenkins service
-sudo systemctl restart jenkins
-
-echo "Jenkins has been installed and started on port 8090."
-echo "Hostname set to $NEW_HOSTNAME."
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+echo "Jenkins has been installed and started."

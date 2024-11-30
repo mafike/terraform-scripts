@@ -8,7 +8,7 @@ resource "aws_lb" "jenkinsalb" {
 
 }
 resource "aws_lb_target_group" "asg" {
-  name     = "asg-TG"
+  name     = "asg-TG-${random_string.suffix.result}"
   port     = var.jenkins_port
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
@@ -67,4 +67,8 @@ resource "aws_lb_listener_rule" "asg" {
 output "alb_dns_name" {
   value       = aws_lb.jenkinsalb.dns_name
   description = "The domain name of the load balancer"
+}
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
 }

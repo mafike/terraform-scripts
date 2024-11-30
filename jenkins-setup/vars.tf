@@ -19,7 +19,6 @@ variable "vpc_cidr" {
   default = "10.0.0.0/16"
 }
 
-
 variable "availability_zone" {
   type    = string
   default = "us-east-1a"
@@ -27,7 +26,7 @@ variable "availability_zone" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.micro"
+  default = "t2.medium"
 }
 
 variable "mac_ip" {
@@ -39,7 +38,7 @@ variable "mac_ip" {
 
 variable "jenkins_port" {
   type    = number
-  default = 8090
+  default = 8080
 }
 variable "alb_port" {
   type    = number

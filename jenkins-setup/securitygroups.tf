@@ -9,12 +9,12 @@ resource "aws_security_group" "jenkins" {
     protocol  = "tcp"
     // security_groups = [module.bastion_outputs.bastion_security_group_id]
     // security_groups = [data.terraform_remote_state.vpc.outputs.bastion_security_group_id]
-    cidr_blocks = [var.mac_ip] # SSH access
+    cidr_blocks = ["0.0.0.0/0"] # SSH access
   }
 
   ingress {
-    from_port   = 8090
-    to_port     = 8090
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Jenkins Web UI
   }
@@ -45,10 +45,10 @@ resource "aws_security_group" "ingress-efs" {
 
   ingress {
 
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 2049
+    to_port         = 2049
+    protocol        = "tcp"
+    security_groups = [aws_security_group.jenkins.id]
   }
 
   egress {
