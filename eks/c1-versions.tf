@@ -16,10 +16,10 @@ terraform {
       version = "~> 2.16"
     }
     http = {
-      source = "hashicorp/http"
+      source  = "hashicorp/http"
       version = "~> 3.4.5"
+    }
   }
-}
 }
 /*
 provider "kubernetes" {
