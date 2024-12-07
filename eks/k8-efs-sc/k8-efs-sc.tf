@@ -12,4 +12,5 @@ resource "kubernetes_storage_class_v1" "efs_sc" {
     gidRangeEnd = "2000" # optional
     basePath = "/dynamic_provisioning" # optional
   }
+   volume_binding_mode = "WaitForFirstConsumer"
 }
